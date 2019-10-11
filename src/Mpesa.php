@@ -1,10 +1,8 @@
 <?php
 
 namespace Wasksofts\Mpesa;
-
 use Wasksofts\Mpesa\Config;
-use Jenssegers\Date\Date;
-
+date_default_timezone_set("Africa/Nairobi");
 /**----------------------------------------------------------------------------------------
 | Mpesa Api library
 |------------------------------------------------------------------------------------------
@@ -12,9 +10,9 @@ use Jenssegers\Date\Date;
 | * @package     mpesa class
 | * @author      steven kamanu
 | * @email       mukamanusteven at gmail dot com
-| * @website     htps://kenyadevlopers.co.ke
-| * @version     1.0
-| * @license     MIT License Copyright (c) 2017 Wasksofts technology
+| * @website     https://kenyadevlopers.co.ke
+| * @version     1.1
+| * @license     MIT License Copyright (c) 2019 Wasksofts technology
 | *--------------------------------------------------------------------------------------- 
 | *---------------------------------------------------------------------------------------
  */
@@ -26,47 +24,83 @@ class Mpesa
   private  $consumer_key;
   private  $consumer_secret;
   private  $shortcode;
+  private  $pass_key;
+  private  $initiator_name;
+  private  $initiator_pass;
+  private  $live_endpoint;
+  private  $sandbox_endpoint;
   private  $confirmation_url;
   private  $timeout_url;
   private  $validation_url;
   private  $callback_url;
   private  $result_url;
-  private  $passkey;
-  private  $password;
-  private  $initiatorName;
-  private  $initiatorPass;
-  private  $live_endpoint;
-  private  $sandbox_endpoint;
   private  $env;
 
-  function __construct(array $data = [])
+  function __construct()
   {
-
     $this->config = Config::getInstance();
-    $this->consumer_key       = $this->config->get('consumer_key');
-    $this->consumer_secret    = $this->config->get('consumer_secret');
-    $this->shortcode          = $this->config->get('shortcode');
-    $this->shortcode1         = $this->config->get('shortcode1');
-    $this->shortcode2         = $this->config->get('shortcode2');
-    $this->initiatorName      = $this->config->get('initiator_name');
-    $this->initiatorPass      = $this->config->get('initiator_pass');
-    $this->passkey            = $this->config->get('pass_key');
-    $this->env                = $this->config->get('env');
-    $this->confirmation_url   = 'https://example.com/confirmation_url.php';
-    $this->validation_url     = 'https://example.com/validation_url.php';
-    $this->callback_url       = 'https://example.com/callback_url.php';
-    $this->result_url         = 'https://example.com/result_url.php';
-    $this->timeout_url        = 'https://example.com/timeout_url.php';
     $this->SecurityCredential = $this->security_credential();
-    $this->timestamp          = $this->timestamp();
-    $this->password           = $this->password();
     $this->live_endpoint      = 'https://api.safaricom.co.ke/';
     $this->sandbox_endpoint   = 'https://sandbox.safaricom.co.ke/';
   }
 
+  /**
+   * Mpesa configuration function
+   * 
+   * @param $key
+   * @param $value
+   * 
+   * @return object
+   */
   public function config($key, $value)
   {
-    $this->config->set($key, $value);
+    switch ($key) {
+      case 'consumer_key':
+        $this->consumer_key = $value;
+        break;
+      case 'consumer_secret':
+        $this->consumer_secret = $value;
+        break;
+      case 'shortcode':
+        $this->shortcode = $value;
+        break;
+      case 'shortcode1':
+        $this->shortcode1 = $value;
+        break;
+      case 'shortcode2':
+        $this->shortcode2 = $value;
+        break;
+      case 'initiator_name':
+        $this->initiator_name = $value;
+        break;
+      case 'initiator_pass':
+        $this->initiator_pass = $value;
+        break;
+      case 'pass_key':
+        $this->pass_key = $value;
+        break;
+      case 'env':
+        $this->env = $value;
+        break;
+      case 'callback_url':
+        $this->callback_url = $value;
+        break;
+      case 'confirmation_url':
+        $this->confirmation_url = $value;
+        break;
+      case 'validation_url':
+        $this->validation_url = $value;
+        break;
+      case 'result_url':
+        $this->result_url = $value;
+        break;
+      case 'timeout_url':
+        $this->timeout_url = $value;
+        break;
+      default:
+        echo 'Invalid config key :' . $key;
+        die;
+    }
   }
 
   /** To authenticate your app and get an Oauth access token
@@ -81,18 +115,19 @@ class Mpesa
 
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
-    $credentials = base64_encode($this->config->get('consumer_key') . ':' . $this->config->get('consumer_secret'));
+    $credentials = base64_encode($this->consumer_key . ':' . $this->consumer_secret);
 
     //setting a custom header      
     curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Basic ' . $credentials)); //setting a custom header
     curl_setopt($curl, CURLOPT_HEADER, false);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 
     $curl_response = curl_exec($curl);
 
     return json_decode($curl_response)->access_token;
   }
+
 
   /** C2B enable Paybill and buy goods merchants to integrate to mpesa and receive real time payment notification
    *  C2B register URL API register the 3rd party's confirmation and validation url to mpesa
@@ -106,34 +141,39 @@ class Mpesa
   {
     $url =  $this->env('mpesa/c2b/v1/registerurl');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
     //Fill in the request parameters with valid values
-
     $curl_post_data = array(
-      'ShortCode' => $this->config->get('shortcode'),
-      'ResponseType' => 'Timeout',
+      'ShortCode' => $this->shortcode2,
+      'ResponseType' => 'Completed',
       'ConfirmationURL' => $this->confirmation_url,
       'ValidationURL' => $this->validation_url
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-
-    $curl_response = curl_exec($curl);
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
+    $this->query($url, $curl_post_data);
   }
+
+
+  /** STK Push Status Query
+   * This is used to check the status of a Lipa Na M-Pesa Online Payment.
+   *
+   * @param   string  $checkoutRequestID | Checkout RequestID
+   * @return  array object
+   */
+  public function STKPushQuery($checkoutRequestID)
+  {
+    $url =  $this->env('mpesa/stkpushquery/v1/query');
+
+    //Fill in the request parameters with valid values        
+    $curl_post_data = array(
+      'BusinessShortCode' => $this->shortcode,
+      'Password'  => $this->password(),
+      'Timestamp' => $this->timestamp(),
+      'CheckoutRequestID' => $checkoutRequestID
+    );
+
+    $this->query($url, $curl_post_data);
+  }
+
 
   /** STK Push Simulation lipa na M-pesa Online payment API is used to initiate a M-pesa transaction on behalf of a customer using STK push
    * This is the same technique mySafaricom app uses whenever the app is used to make payments
@@ -148,38 +188,22 @@ class Mpesa
   {
     $url =  $this->env('mpesa/stkpush/v1/processrequest');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
     //Fill in the request parameters with valid values     
     $curl_post_data = array(
-      'BusinessShortCode' => $this->config->get('shortcode'),
-      'Password' => $this->password,
-      'Timestamp' => $this->timestamp,
+      'BusinessShortCode' => $this->shortcode,
+      'Password' => $this->password(),
+      'Timestamp' => $this->timestamp(),
       'TransactionType' => 'CustomerPayBillOnline',
       'Amount' => $Amount,
       'PartyA' => $PartyA,
-      'PartyB' => $this->config->get('shortcode'),
+      'PartyB' => $this->shortcode,
       'PhoneNumber' => $PartyA,
       'CallBackURL' => $this->callback_url,
       'AccountReference' => $AccountReference,
       'TransactionDesc' => $TransactionDesc
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-    echo   $curl_response;
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
+    $this->query($url, $curl_post_data);
   }
 
   /** C2B simulate transaction
@@ -193,10 +217,6 @@ class Mpesa
   {
     $url =  $this->env('mpesa/c2b/v1/simulate');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
-
     //Fill in the request parameters with valid values        
     $curl_post_data = array(
       'ShortCode'  => $this->shortcode1,
@@ -206,62 +226,8 @@ class Mpesa
       'BillRefNumber' => $BillRefNumber  // '00000' //optional
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-
-    $curl_response = curl_exec($curl);
-
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
+    $this->query($url, $curl_post_data);
   }
-
-
-  /** STK Push Status Query
-   * This is used to check the status of a Lipa Na M-Pesa Online Payment.
-   *
-   * @param   string  $checkoutRequestID | Checkout RequestID
-   * @return  array object
-   */
-  public function STKPushQuery($checkoutRequestID)
-  {
-    $url =  $this->env('mpesa/stkpushquery/v1/query');
-
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
-
-    //Fill in the request parameters with valid values        
-    $curl_post_data = array(
-      'BusinessShortCode' => $this->shortcode,
-      'Password'  => $this->password,
-      'Timestamp' => $this->timestamp,
-      'CheckoutRequestID' => $checkoutRequestID
-    );
-
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
-  }
-
 
   /**  
    * B2C Payment Request transactions betwwen a company and customers 
@@ -279,13 +245,9 @@ class Mpesa
   {
     $url = $this->env('mpesa/b2c/v1/paymentrequest');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    //setting custom header
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token()));
     //Fill in the request parameters with valid values           
     $curl_post_data = array(
-      'InitiatorName'      => $this->initiatorName,
+      'InitiatorName'      => $this->initiator_name,
       'SecurityCredential' => $this->SecurityCredential,
       'CommandID' => $commandId,
       'Amount' => $amount,
@@ -297,19 +259,7 @@ class Mpesa
       'Occasion' => $occassion
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
+    $this->query($url, $curl_post_data);
   }
 
   /** B2B Payment Request transactions between a business and another business
@@ -330,14 +280,9 @@ class Mpesa
   {
     $url =  $this->env('/mpesa/b2b/v1/paymentrequest');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
-
-
     $curl_post_data = array(
       //Fill in the request parameters with valid values
-      'Initiator' => $this->initiatorName,
+      'Initiator' => $this->initiator_name,
       'SecurityCredential' => $this->SecurityCredential,
       'CommandID' => $commandId,
       'SenderIdentifierType' => $SenderIdentifierType,
@@ -351,20 +296,7 @@ class Mpesa
       'ResultURL' => $this->result_url
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-
-    $curl_response = curl_exec($curl);
-    if ($curl_response === true) {
-      $this->msg = $curl_response;
-    } else {
-      $this->msg = curl_error($curl);
-    }
+    $this->query($url, $curl_post_data);
   }
 
 
@@ -381,12 +313,9 @@ class Mpesa
   {
     $url =  $this->env('mpesa/accountbalance/v1/query');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
     //Fill in the request parameters with valid values
     $curl_post_data = array(
-      'Initiator' => $this->initiatorName,
+      'Initiator' => $this->initiator_name,
       'SecurityCredential' => $this->SecurityCredential,
       'CommandID' => 'AccountBalance',
       'PartyA' => $PartyA,
@@ -396,19 +325,8 @@ class Mpesa
       'ResultURL' => $this->result_url
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-    return $curl_response;
-
-    $this->msg = json_decode($curl_response);
+    $this->query($url, $curl_post_data);
   }
-
 
   /** reverses a B2B ,B2C ir C2B Mpesa,transaction
    *
@@ -425,12 +343,9 @@ class Mpesa
   {
     $url =  $this->env('mpesa/reversal/v1/request');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
     //Fill in the request parameters with valid values      
     $curl_post_data = array(
-      'Initiator' => $this->initiatorName,
+      'Initiator' => $this->initiator_name,
       'SecurityCredential' => $this->SecurityCredential,
       'CommandID' => 'TransactionReversal',
       'TransactionID' => $TransactionID,
@@ -443,19 +358,8 @@ class Mpesa
       'Occasion' => $Occasion
     );
 
-    $data_string = json_encode($curl_post_data);
-
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data_string);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-
-    $curl_response = curl_exec($curl);
-    return $curl_response;
-
-    $this->msg = $curl_response;
+    $this->query($url, $curl_post_data);
   }
-
 
 
   /** Transaction Status Request API checks the status of B2B ,B2C and C2B APIs transactions
@@ -472,13 +376,9 @@ class Mpesa
   {
     $url =  $this->env('mpesa/transactionstatus/v1/query');
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token())); //setting custom header
-
     //Fill in the request parameters with valid values
     $curl_post_data = array(
-      'Initiator' => $this->initiatorName,
+      'Initiator' => $this->initiator_name,
       'SecurityCredential' => $this->SecurityCredential,
       'CommandID' => 'TransactionStatusQuery',
       'TransactionID' => $TransactionID,
@@ -490,6 +390,22 @@ class Mpesa
       'Occasion' => $Occassion
     );
 
+    $this->query($url, $curl_post_data);
+  }
+
+  /** query function
+   * 
+   * @param  $url
+   * @param  $curl_post_data
+   * @return json
+   */
+  public function query($url, $curl_post_data)
+  {
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    //setting custom header
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type:application/json', 'Authorization:Bearer ' . $this->oauth_token()));
+
     $data_string = json_encode($curl_post_data);
 
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -498,12 +414,12 @@ class Mpesa
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 
     $curl_response = curl_exec($curl);
-    return $curl_response;
-
-    $this->msg = $curl_response;
+    if ($curl_response == true) {
+      $this->msg = $curl_response;
+    } else {
+      $this->msg = curl_error($curl);
+    }
   }
-
-
 
   /** get environment url
    *
@@ -514,40 +430,12 @@ class Mpesa
   public function env($request_url = null)
   {
     if (!is_null($request_url)) {
-      if ($this->config->get('env') == "sandbox") {
+      if ($this->env === "sandbox") {
         return $this->sandbox_endpoint . $request_url;
-      } elseif ($this->config->get('env') == "live") {
+      } elseif ($this->env === "live") {
         return $this->live_endpoint . $request_url;
       }
     }
-  }
-
-  /** function validate kenya phone number
-   * 
-   * @param  int  $phone
-   * @return int
-   */
-  public function validate_phone($phone)
-  {
-    $phone = str_replace("+", "", $phone);
-    $phone = str_replace(" ", "", $phone);
-    $phone = str_replace("(", "", $phone);
-    $phone = str_replace(")", "", $phone);
-    if (is_numeric($phone)) {
-      $length = strlen($phone);
-      if ($length == 12) {
-        if (substr($phone, 0, 3) == '254') {
-          return $phone;
-        }
-      } elseif ($length == 10) {
-        if (substr($phone, 0, 1) == '0') {
-          return "254" . substr($phone, 1, 9);
-        }
-      } elseif ($length == 9) {
-        return "254" . $phone;
-      }
-    }
-    return false;
   }
 
   /**
@@ -560,9 +448,8 @@ class Mpesa
    */
   public function security_credential()
   {
-    //$publicKey = file_get_contents('myapi/cert/cert.cer');
-    $publicKey = $this->cert();
-    $plaintext = $this->initiatorPass;
+    $publicKey = file_get_contents(__DIR__ . '/cert.cert');
+    $plaintext = $this->initiator_pass;
 
     openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
@@ -576,7 +463,7 @@ class Mpesa
    */
   public function generate_key()
   {
-    $key = $this->cert();
+    $key = file_get_contents(__DIR__ . '/cert.cert');
     $rsa = new Crypt_RSA();
     $rsa->loadKey($key);
     $rsa->setPublicKey($key);
@@ -592,8 +479,8 @@ class Mpesa
    */
   public function password()
   {
-    $Merchant_id =  trim($this->config->get('shortcode'));
-    $passkey     =  trim($this->config->get('passkey'));
+    $Merchant_id =  trim($this->shortcode);
+    $passkey     =  trim($this->pass_key);
     $password    =  base64_encode($Merchant_id . $passkey . $this->timestamp());
 
     return $password;
@@ -601,97 +488,11 @@ class Mpesa
 
   public function timestamp()
   {
-    $datetime = Date::now()->format('YmdHis');
-
-    return $datetime;
-    //return date('YmdHis');
+    return date('YmdHis');
   }
-
-  /**
-   *Use this function to confirm all transactions in callback routes
-   */
-  public function finishTransaction($status = true)
-  {
-    if ($status === true) {
-      $resultArray = [
-        "ResultDesc" => "Confirmation Service request accepted successfully",
-        "ResultCode" => "0"
-      ];
-    } else {
-      $resultArray = [
-        "ResultDesc" => "Confirmation Service not accepted",
-        "ResultCode" => "1"
-      ];
-    }
-
-    header('Content-Type: application/json');
-    echo json_encode($resultArray);
-  }
-
-  /**
-   *Use this function to get callback data posted in callback routes
-   */
-  public function getDataFromCallback()
-  {
-    $callbackJSONData = file_get_contents('php://input');
-    return $callbackJSONData;
-  }
-
-  public function jsonEncode($responseData)
-  {
-
-    header('Content-Type: application/json');
-    echo json_encode($responseData, JSON_PRETTY_PRINT);
-  }
-
-
-
 
   public function getResponseData()
   {
-    return $this->msg;
-  }
-
-  public function cert()
-  {
-
-    return "-----BEGIN CERTIFICATE-----
-MIIGkzCCBXugAwIBAgIKXfBp5gAAAD+hNjANBgkqhkiG9w0BAQsFADBbMRMwEQYK
-CZImiZPyLGQBGRYDbmV0MRkwFwYKCZImiZPyLGQBGRYJc2FmYXJpY29tMSkwJwYD
-VQQDEyBTYWZhcmljb20gSW50ZXJuYWwgSXNzdWluZyBDQSAwMjAeFw0xNzA0MjUx
-NjA3MjRaFw0xODAzMjExMzIwMTNaMIGNMQswCQYDVQQGEwJLRTEQMA4GA1UECBMH
-TmFpcm9iaTEQMA4GA1UEBxMHTmFpcm9iaTEaMBgGA1UEChMRU2FmYXJpY29tIExp
-bWl0ZWQxEzARBgNVBAsTClRlY2hub2xvZ3kxKTAnBgNVBAMTIGFwaWdlZS5hcGlj
-YWxsZXIuc2FmYXJpY29tLmNvLmtlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
-CgKCAQEAoknIb5Tm1hxOVdFsOejAs6veAai32Zv442BLuOGkFKUeCUM2s0K8XEsU
-t6BP25rQGNlTCTEqfdtRrym6bt5k0fTDscf0yMCoYzaxTh1mejg8rPO6bD8MJB0c
-FWRUeLEyWjMeEPsYVSJFv7T58IdAn7/RhkrpBl1dT7SmIZfNVkIlD35+Cxgab+u7
-+c7dHh6mWguEEoE3NbV7Xjl60zbD/Buvmu6i9EYz+27jNVPI6pRXHvp+ajIzTSsi
-eD8Ztz1eoC9mphErasAGpMbR1sba9bM6hjw4tyTWnJDz7RdQQmnsW1NfFdYdK0qD
-RKUX7SG6rQkBqVhndFve4SDFRq6wvQIDAQABo4IDJDCCAyAwHQYDVR0OBBYEFG2w
-ycrgEBPFzPUZVjh8KoJ3EpuyMB8GA1UdIwQYMBaAFOsy1E9+YJo6mCBjug1evuh5
-TtUkMIIBOwYDVR0fBIIBMjCCAS4wggEqoIIBJqCCASKGgdZsZGFwOi8vL0NOPVNh
-ZmFyaWNvbSUyMEludGVybmFsJTIwSXNzdWluZyUyMENBJTIwMDIsQ049U1ZEVDNJ
-U1NDQTAxLENOPUNEUCxDTj1QdWJsaWMlMjBLZXklMjBTZXJ2aWNlcyxDTj1TZXJ2
-aWNlcyxDTj1Db25maWd1cmF0aW9uLERDPXNhZmFyaWNvbSxEQz1uZXQ/Y2VydGlm
-aWNhdGVSZXZvY2F0aW9uTGlzdD9iYXNlP29iamVjdENsYXNzPWNSTERpc3RyaWJ1
-dGlvblBvaW50hkdodHRwOi8vY3JsLnNhZmFyaWNvbS5jby5rZS9TYWZhcmljb20l
-MjBJbnRlcm5hbCUyMElzc3VpbmclMjBDQSUyMDAyLmNybDCCAQkGCCsGAQUFBwEB
-BIH8MIH5MIHJBggrBgEFBQcwAoaBvGxkYXA6Ly8vQ049U2FmYXJpY29tJTIwSW50
-ZXJuYWwlMjBJc3N1aW5nJTIwQ0ElMjAwMixDTj1BSUEsQ049UHVibGljJTIwS2V5
-JTIwU2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmlndXJhdGlvbixEQz1zYWZh
-cmljb20sREM9bmV0P2NBQ2VydGlmaWNhdGU/YmFzZT9vYmplY3RDbGFzcz1jZXJ0
-aWZpY2F0aW9uQXV0aG9yaXR5MCsGCCsGAQUFBzABhh9odHRwOi8vY3JsLnNhZmFy
-aWNvbS5jby5rZS9vY3NwMAsGA1UdDwQEAwIFoDA9BgkrBgEEAYI3FQcEMDAuBiYr
-BgEEAYI3FQiHz4xWhMLEA4XphTaE3tENhqCICGeGwcdsg7m5awIBZAIBDDAdBgNV
-HSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwJwYJKwYBBAGCNxUKBBowGDAKBggr
-BgEFBQcDAjAKBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAQEAC/hWx7KTwSYr
-x2SOyyHNLTRmCnCJmqxA/Q+IzpW1mGtw4Sb/8jdsoWrDiYLxoKGkgkvmQmB2J3zU
-ngzJIM2EeU921vbjLqX9sLWStZbNC2Udk5HEecdpe1AN/ltIoE09ntglUNINyCmf
-zChs2maF0Rd/y5hGnMM9bX9ub0sqrkzL3ihfmv4vkXNxYR8k246ZZ8tjQEVsKehE
-dqAmj8WYkYdWIHQlkKFP9ba0RJv7aBKb8/KP+qZ5hJip0I5Ey6JJ3wlEWRWUYUKh
-gYoPHrJ92ToadnFCCpOlLKWc0xVxANofy6fqreOVboPO0qTAYpoXakmgeRNLUiar
-0ah6M/q/KA==
------END CERTIFICATE-----";
+     return $this->msg;
   }
 }
