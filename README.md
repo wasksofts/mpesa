@@ -44,8 +44,7 @@ $ composer require wasksofts/mpesa
     
     require_once('vendor/autoload.php');
     
-# callback json data received
-
+# Callback json data received from safaricom
     use Wasksofts\Mpesa\Callback;
 
     $callback = new Callback;
