@@ -5,11 +5,10 @@ This package seeks to help php developers implement the various Mpesa APIs witho
 #  Installation using composer
 composer require wasksofts/mpesa --dev
 
-#  example of configuration
+#  Usage example
 
-require_once('vendor/autoload.php');
-
-  use Wasksofts\Mpesa\Mpesa;
+     require_once('vendor/autoload.php')
+     use Wasksofts\Mpesa\Mpesa;
 
     $mpesa  = new Mpesa();
     $mpesa->config('consumer_key', '');
