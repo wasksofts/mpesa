@@ -1,0 +1,39 @@
+{
+    "name": "wasksofts/mpesa",
+    "type": "library",
+    "description": "Mpesa daraja api library",
+    "keywords": [
+        "codeigniter mpesa library",
+        "gateway",
+        "mpesa",
+        "paybill",
+        "lipa na mpesa",
+        "reverse money",
+        "customer to business",
+        "bussines to bussines"
+    ],
+    "homepage": "https://github.com/wasksofts/wasksofts/mpesa",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "stevenkamanu",
+            "email": "mukamanusteven@gmail.com",
+            "homepage": "https://wasksofts.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Wasksofts\\Mpesa\\": "src"
+        }
+    },
+    "require": {
+        "php": "^5.6|^7",
+        "jenssegers/date":"^3.1"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.1-dev"
+        }
+    },
+    "minimum-stability": "dev"
+}
