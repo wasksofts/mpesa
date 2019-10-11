@@ -40,4 +40,21 @@ composer require wasksofts/mpesa
     //get responses
     echo $mpesa->getResponseData();
     
+    require_once('vendor/autoload.php');
+    
+# callback json data received
+
+    use Wasksofts\Mpesa\Callback;
+
+    $callback = new Callback;
+    $callback::processSTKPushRequestCallback();
+    $callback::processC2BRequestConfirmation();
+    $callback::processC2BRequestValidation();
+    $callback::processB2CRequestCallback();
+    $callback::processB2BRequestCallback();
+    $callback::processAccountBalanceRequestCallback();
+    $callback::processReversalRequestCallBack();
+    $callback::processTransactionStatusRequestCallback();
+
+    
     
