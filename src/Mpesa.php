@@ -477,7 +477,7 @@ class Mpesa
    */
   public function security_credential()
   {
-    $publicKey = file_get_contents(__DIR__ . '/cert.cert');
+    $publicKey = file_get_contents(__DIR__ . '\cert.cert');
     openssl_public_encrypt($this->initiator_pass, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
     return base64_encode($encrypted);
@@ -494,6 +494,6 @@ class Mpesa
     if ($array == TRUE) {
       return json_decode($this->msg);
     }
-    return $this->msg;
+    return json_decode($this->msg);
   }
 }
