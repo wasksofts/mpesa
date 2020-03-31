@@ -1,8 +1,11 @@
 <?php
 
 namespace Wasksofts\Mpesa;
+
 use Wasksofts\Mpesa\Config;
+
 date_default_timezone_set("Africa/Nairobi");
+
 /**----------------------------------------------------------------------------------------
 | Mpesa Api library
 |------------------------------------------------------------------------------------------
@@ -10,9 +13,9 @@ date_default_timezone_set("Africa/Nairobi");
 | * @package     mpesa class
 | * @author      steven kamanu
 | * @email       mukamanusteven at gmail dot com
-| * @website     https://kenyadevlopers.co.ke
-| * @version     1.1
-| * @license     MIT License Copyright (c) 2019 Wasksofts technology
+| * @website     htps://wasksofts.com
+| * @version     1.0
+| * @license     MIT License Copyright (c) 2017 Wasksofts technology
 | *--------------------------------------------------------------------------------------- 
 | *---------------------------------------------------------------------------------------
  */
@@ -124,8 +127,11 @@ class Mpesa
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
 
     $curl_response = curl_exec($curl);
-
-    return json_decode($curl_response)->access_token;
+    if ($curl_response == true) {
+      return json_decode($curl_response)->access_token;
+    } else {
+      return curl_error($curl);
+    }
   }
 
 
@@ -143,7 +149,7 @@ class Mpesa
 
     //Fill in the request parameters with valid values
     $curl_post_data = array(
-      'ShortCode' => $this->shortcode2,
+      'ShortCode' => $this->shortcode1,
       'ResponseType' => 'Completed',
       'ConfirmationURL' => $this->confirmation_url,
       'ValidationURL' => $this->validation_url
@@ -241,7 +247,7 @@ class Mpesa
    * @param   string    $ocassion  | optional
    * @return  array object
    */
-  public function b2c($amount, $commandId, $receiver, $remark, $occassion = null)
+  public function b2c($amount, $commandId, $receiver, $remark, $occassion = null, $timeout_url, $result_url)
   {
     $url = $this->env('mpesa/b2c/v1/paymentrequest');
 
@@ -254,8 +260,8 @@ class Mpesa
       'PartyA' => $this->shortcode1,
       'PartyB' => $receiver,
       'Remarks' => $remark,
-      'QueueTimeOutURL' => $this->timeout_url,
-      'ResultURL' => $this->result_url,
+      'QueueTimeOutURL' => $this->timeout_url . $timeout_url,
+      'ResultURL' => $this->result_url . $result_url,
       'Occasion' => $occassion
     );
 
@@ -276,7 +282,7 @@ class Mpesa
    * @param  string   $remarks
    * @return array    object 
    */
-  public function b2b($Amount, $commandId, $PartyB, $RecieverIdentifierType, $SenderIdentifierType, $AccountReference, $Remarks)
+  public function b2b($Amount, $commandId, $PartyB, $RecieverIdentifierType, $SenderIdentifierType, $AccountReference, $Remarks, $timeout_url, $result_url)
   {
     $url =  $this->env('/mpesa/b2b/v1/paymentrequest');
 
@@ -292,8 +298,8 @@ class Mpesa
       'PartyB' => $PartyB,
       'AccountReference' => $AccountReference,
       'Remarks' => $Remarks,
-      'QueueTimeOutURL' => $this->timeout_url,
-      'ResultURL' => $this->result_url
+      'QueueTimeOutURL' => $this->timeout_url . $timeout_url,
+      'ResultURL' => $this->result_url . $result_url
     );
 
     $this->query($url, $curl_post_data);
@@ -309,7 +315,7 @@ class Mpesa
    * @param   string  $Remarks | Comments that are sent along with the transaction.
    * @return  array object
    */
-  public function accountbalance($PartyA, $IdentifierType, $Remarks)
+  public function accountbalance($PartyA, $IdentifierType, $Remarks, $timeout_url, $result_url)
   {
     $url =  $this->env('mpesa/accountbalance/v1/query');
 
@@ -321,8 +327,8 @@ class Mpesa
       'PartyA' => $PartyA,
       'IdentifierType' => $IdentifierType,
       'Remarks' => $Remarks,
-      'QueueTimeOutURL' => $this->timeout_url,
-      'ResultURL' => $this->result_url
+      'QueueTimeOutURL' => $this->timeout_url . $timeout_url,
+      'ResultURL' => $this->result_url . $result_url
     );
 
     $this->query($url, $curl_post_data);
@@ -339,7 +345,7 @@ class Mpesa
    * @param   string   $Ocassion
    * @return  string
    */
-  public function reversal($Amount, $ReceiverParty, $RecieverIdentifierType, $TransactionID, $Remarks, $Occasion = NULL)
+  public function reversal($Amount, $ReceiverParty, $RecieverIdentifierType, $TransactionID, $Remarks, $Occasion = NULL, $timeout_url, $result_url)
   {
     $url =  $this->env('mpesa/reversal/v1/request');
 
@@ -352,8 +358,8 @@ class Mpesa
       'Amount' => $Amount,
       'ReceiverParty' => $ReceiverParty,
       'RecieverIdentifierType' => $RecieverIdentifierType, //4
-      'ResultURL' => $this->result_url,
-      'QueueTimeOutURL' => $this->timeout_url,
+      'ResultURL' => $this->result_url . $result_url,
+      'QueueTimeOutURL' => $this->timeout_url . $timeout_url,
       'Remarks' => $Remarks,
       'Occasion' => $Occasion
     );
@@ -372,7 +378,7 @@ class Mpesa
    * @param   string  $Ocassion
    * @return array object
    */
-  public function transaction_status($TransactionID, $PartyA, $IdentifierType, $Remarks, $Occassion = NULL)
+  public function transaction_status($TransactionID, $PartyA, $IdentifierType, $Remarks, $Occassion = NULL, $timeout_url, $result_url)
   {
     $url =  $this->env('mpesa/transactionstatus/v1/query');
 
@@ -384,8 +390,8 @@ class Mpesa
       'TransactionID' => $TransactionID,
       'PartyA' => $PartyA,
       'IdentifierType' => $IdentifierType,
-      'ResultURL' => $this->result_url,
-      'QueueTimeOutURL' => $this->timeout_url,
+      'ResultURL' => $this->result_url . $result_url,
+      'QueueTimeOutURL' => $this->timeout_url . $timeout_url,
       'Remarks' => $Remarks,
       'Occasion' => $Occassion
     );
@@ -438,39 +444,6 @@ class Mpesa
     }
   }
 
-  /**
-   * Mpesa authenticate a transaction by decrypting the security credential 
-   * Security credentials are generated by encrypting the Base64 encoded string of the M-Pesa short code 
-   * and password, which is encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
-   * 
-   * @access  private
-   * @return  String
-   */
-  public function security_credential()
-  {
-    $publicKey = file_get_contents(__DIR__ . '/cert.cert');
-    $plaintext = $this->initiator_pass;
-
-    openssl_public_encrypt($plaintext, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
-
-    return base64_encode($encrypted);
-  }
-
-  /**
-   * Generate rsa key using phpseclib a pure rsa implementation
-   * @deprecated
-   * @return string,
-   */
-  public function generate_key()
-  {
-    $key = file_get_contents(__DIR__ . '/cert.cert');
-    $rsa = new Crypt_RSA();
-    $rsa->loadKey($key);
-    $rsa->setPublicKey($key);
-
-    return $rsa->getPublicKey();
-  }
-
   /** Password for encrypting the request.
    *  This is generated by base64 encoding Bussiness shorgcode passkey and timestamp
    *
@@ -486,13 +459,41 @@ class Mpesa
     return $password;
   }
 
+  /**
+   * timestamp for the time of transaction
+   */
   public function timestamp()
   {
     return date('YmdHis');
   }
 
-  public function getResponseData()
+  /**
+   * Mpesa authenticate a transaction by decrypting the security credential 
+   * Security credentials are generated by encrypting the Base64 encoded string of the M-Pesa short code 
+   * and password, which is encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
+   * 
+   * @access  private
+   * @return  String
+   */
+  public function security_credential()
   {
-     return $this->msg;
+    $publicKey = file_get_contents(__DIR__ . '/cert.cer');
+    openssl_public_encrypt($this->initiator_pass, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
+
+    return base64_encode($encrypted);
+  }
+
+
+  /**
+   *  response on api call
+   * 
+   *  @return data array or json
+   */
+  public function getResponseData($array = NULL)
+  {
+    if ($array == TRUE) {
+      return json_decode($this->msg);
+    }
+    return $this->msg;
   }
 }
