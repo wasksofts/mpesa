@@ -30,6 +30,7 @@ class Mpesa
   private  $pass_key;
   private  $initiator_name;
   private  $initiator_pass;
+  private  $security_credential;
   private  $live_endpoint;
   private  $sandbox_endpoint;
   private  $confirmation_url;
@@ -78,6 +79,9 @@ class Mpesa
         break;
       case 'initiator_pass':
         $this->initiator_pass = $value;
+        break;
+      case 'security_credential':
+        $this->security_credential = $value;
         break;
       case 'pass_key':
         $this->pass_key = $value;
@@ -480,7 +484,7 @@ class Mpesa
     $publicKey = file_get_contents(__DIR__ . '\cert.cert');
     openssl_public_encrypt($this->initiator_pass, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
 
-    return base64_encode($encrypted);
+    return if(!is_null($this->security_credential))? $this->security_credential : base64_encode($encrypted);
   }
 
 
