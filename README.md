@@ -22,10 +22,10 @@ $ composer require wasksofts/mpesa
     $mpesa->config('shortcode1', '');
     $mpesa->config('shortcode2', '');
      $mpesa->config('security_credential','');
-    $mpesa->config('callback_url', 'https://example.com/callback_url.php');
-    $mpesa->config('confirmation_url', 'https://example.com/confirmation_url.php/');
-    $mpesa->config('validation_url', 'https://example.com/validation_url.php/');
-    $mpesa->config('result_url', 'https://example.com/result_url.php/');
+    $mpesa->config('callback_url', 'https://example.com/callback_url/');
+    $mpesa->config('confirmation_url', 'https://example.com/confirmation_url/');
+    $mpesa->config('validation_url', 'https://example.com/validation_url/');
+    $mpesa->config('result_url', 'https://example.com/result_url.php/'); 
     $mpesa->config('timeout_url', 'https://example.com/timeout_url.php/');
     $mpesa->config('env', 'sandbox');
     
@@ -33,8 +33,8 @@ $ composer require wasksofts/mpesa
     $mpesa->STKPushQuery('ws_CO_DMZ_297481201_09042019174418021');
     $mpesa->STKPushSimulation('1','254708374149','pay now','test');
     $mpesa->register_url(); 
-    $mpesa->c2b('10', '254708374149', 'account');
-    $mpesa->b2c('2', 'BusinessPayment', '254708374149', 'payment','b2c_timeout','b2c_result'); //refund
+    $mpesa->c2b('1000', '254708374149', 'account');
+    $mpesa->b2c('200', 'BusinessPayment', '254708374149', 'payment','b2c_timeout','b2c_result'); // last two parameter define callback https://example.com/result_url.php/b2c_timeout/ or https://example.com/result_url/b2c_result/
     $mpesa->b2b('10000','BusinessPayBill','60000','4','4','paytest','cool','b2b_timeout','b2b_result');
     $mpesa->accountbalance('600443','4','remarks','acc_timeout','acc_result');
     $mpesa->reversal('2','254708374149','1','NCR7S1UXBT','PAY NOW VIA WASKSOFT');
