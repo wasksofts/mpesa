@@ -10,6 +10,10 @@ $ composer require wasksofts/mpesa
 #  Usage example
 
      require_once('vendor/autoload.php')
+     use the above statement if it procedural app else if its codeigniter 3.x go config enable $config['composer_autoload'] = 'vendor/autoload.php'; if vendor is root folder if vendor file are on application it should be $config['composer_autoload'] = true ,for laravel and other framework they have no problem
+     
+     
+     
      use Wasksofts\Mpesa\Mpesa;
 
     $mpesa  = new Mpesa();
@@ -25,8 +29,8 @@ $ composer require wasksofts/mpesa
     $mpesa->config('callback_url', 'https://example.com/callback_url/');
     $mpesa->config('confirmation_url', 'https://example.com/confirmation_url/');
     $mpesa->config('validation_url', 'https://example.com/validation_url/');
-    $mpesa->config('result_url', 'https://example.com/result_url.php/'); 
-    $mpesa->config('timeout_url', 'https://example.com/timeout_url.php/');
+    $mpesa->config('result_url', 'https://example.com/result_url/'); 
+    $mpesa->config('timeout_url', 'https://example.com/timeout_url/');
     $mpesa->config('env', 'sandbox');
     
     echo " Token : " . $mpesa->oauth_token();
@@ -46,6 +50,9 @@ $ composer require wasksofts/mpesa
     require_once('vendor/autoload.php');
     
 # Callback json data received from safaricom
+    for call back you can use you own implementation 
+    this is for testing.
+    
     use Wasksofts\Mpesa\Callback;
 
     $callback = new Callback;
