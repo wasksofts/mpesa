@@ -21,6 +21,7 @@ $ composer require wasksofts/mpesa
     $mpesa->config('shortcode', '174379');
     $mpesa->config('shortcode1', '');
     $mpesa->config('shortcode2', '');
+     $mpesa->config('security_credential','');
     $mpesa->config('callback_url', 'https://example.com/callback_url.php');
     $mpesa->config('confirmation_url', 'https://example.com/confirmation_url.php/');
     $mpesa->config('validation_url', 'https://example.com/validation_url.php/');
