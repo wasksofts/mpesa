@@ -47,8 +47,6 @@ $ composer require wasksofts/mpesa
  # get responses
     echo $mpesa->getResponseData();
     
-    require_once('vendor/autoload.php');
-    
 # Callback json data received from safaricom
     for call back you can use you own implementation 
     this is for testing.
