@@ -10,9 +10,9 @@ $ composer require wasksofts/mpesa
 #  Usage example
 
      require_once('vendor/autoload.php')
-     use the above statement if it procedural app else if its codeigniter 3.x go config enable $config['composer_autoload'] = 'vendor/autoload.php'; if vendor is root folder if vendor file are on application it should be $config['composer_autoload'] = true ,for laravel and other framework they have no problem
-     
-     
+  use the above statement if it procedural app else if its codeigniter 3.x go config enable $config['composer_autoload'] = 'vendor/autoload.php'; 
+  if vendor is root folder if vendor file are on application it should be $config['composer_autoload'] = true ,
+  for laravel and other framework they have no problem
      
      use Wasksofts\Mpesa\Mpesa;
 
@@ -25,7 +25,7 @@ $ composer require wasksofts/mpesa
     $mpesa->config('shortcode', '174379');
     $mpesa->config('shortcode1', '');
     $mpesa->config('shortcode2', '');
-     $mpesa->config('security_credential','');
+    $mpesa->config('security_credential','');
     $mpesa->config('callback_url', 'https://example.com/callback_url/');
     $mpesa->config('confirmation_url', 'https://example.com/confirmation_url/');
     $mpesa->config('validation_url', 'https://example.com/validation_url/');
@@ -44,7 +44,7 @@ $ composer require wasksofts/mpesa
     $mpesa->reversal('2','254708374149','1','NCR7S1UXBT','PAY NOW VIA WASKSOFT');
     $mpesa->transaction_status('NCR7S1UXBT','254708374149','4','apitest');
     
-    //get responses
+ # get responses
     echo $mpesa->getResponseData();
     
     require_once('vendor/autoload.php');
