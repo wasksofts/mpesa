@@ -481,10 +481,10 @@ class Mpesa
    */
   public function security_credential()
   {
-    $publicKey = file_get_contents(__DIR__ . '\cert.cert');
-    openssl_public_encrypt($this->initiator_pass, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
-
-    return if(!is_null($this->security_credential))? $this->security_credential : base64_encode($encrypted);
+    //$publicKey = file_get_contents(__DIR__ . '\cert.cert');
+    //openssl_public_encrypt($this->initiator_pass, $encrypted, $publicKey, OPENSSL_PKCS1_PADDING);
+   // return if(!is_null($this->security_credential))? $this->security_credential : base64_encode($encrypted);
+     return $this->security_credential;
   }
 
 
